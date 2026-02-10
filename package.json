@@ -1,0 +1,19 @@
+{
+  "name": "article-craft-agent",
+  "version": "0.1.0",
+  "description": "AI Agent that generates high-quality blog articles using Claude Agent SDK",
+  "type": "module",
+  "scripts": {
+    "generate": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.38",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.7.0"
+  }
+}
