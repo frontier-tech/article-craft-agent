@@ -111,6 +111,12 @@ function parseEditorOutput(text: string, config: ArticleConfig): ArticleResult {
     content = text.slice(0, jsonMatch.index).trim();
   }
 
+  // Strip orchestrator preamble — article starts at the first # heading
+  const headingIndex = content.search(/^#\s+/m);
+  if (headingIndex > 0) {
+    content = content.slice(headingIndex).trim();
+  }
+
   // Extract title from first # heading
   const titleMatch = content.match(/^#\s+(.+)$/m);
   const title = metadata.title || titleMatch?.[1] || config.topic;
