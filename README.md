@@ -165,12 +165,12 @@ curl -X POST https://your-app.vercel.app/api/generate \
 ### How It Works
 
 1. **API receives request** → Validates config and API key
-2. **Vercel Sandbox created** → Secure Linux microVM with node24
-3. **Project cloned** → Fetches code from GitHub repository
-4. **Dependencies installed** → Runs `pnpm install`
-5. **Article generated** → Executes the 4-agent pipeline
-6. **Article returned** → Downloads and parses the result
-7. **Sandbox stopped** → Cleans up resources
+2. **Vercel Sandbox created** → ⚡ Loads from pre-built snapshot (~30sec)
+3. **Article generated** → Executes the 4-agent pipeline
+4. **Article returned** → Downloads and parses the result
+5. **Sandbox stopped** → Cleans up resources
+
+> **🚀 Performance Optimization**: Uses Vercel Sandbox Snapshots to skip dependency installation, reducing startup time from ~3 minutes to ~30 seconds.
 
 ### Architecture
 
@@ -203,13 +203,32 @@ curl -X POST https://your-app.vercel.app/api/generate \
 
 ### Deployment Considerations
 
-- **Max Duration**: 5 minutes (configurable in `vercel.json`)
-- **Memory**: 1024MB (configurable in `vercel.json`)
+- **Max Duration**: 15 minutes (configurable in `vercel.json`)
+- **Memory**: 3008MB (configurable in `vercel.json`)
 - **Timeout**: Adjust based on your Vercel plan
   - Hobby: up to 45 minutes
   - Pro/Enterprise: up to 5 hours
 - **Cost**: Dominated by Claude API usage (~$0.01-0.10 per article)
 - **Sandbox Cost**: ~$0.05/hour + API tokens
+
+### Snapshot Maintenance
+
+The API uses Vercel Sandbox Snapshots for fast startup. Snapshots expire after **7 days** and must be refreshed:
+
+```bash
+# Refresh snapshot (every 7 days)
+vercel link              # If not already linked
+vercel env pull          # Pull environment variables
+node create-snapshot.mjs # Create new snapshot
+
+# The script will output a new snapshot ID
+# Update api/generate.ts with the new ID, or set VERCEL_SNAPSHOT_ID env var
+```
+
+**When to refresh snapshot**:
+- After updating dependencies (`package.json`)
+- After changing agent definitions (`agents/*.md`)
+- Every 7 days (automatic expiration)
 
 ### Local Development
 
