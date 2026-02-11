@@ -80,6 +80,17 @@ export default async function handler(
       throw new Error(`Failed to install Claude Code CLI: ${stderr}`);
     }
 
+    // Verify Claude Code CLI installation
+    console.log("Verifying Claude Code CLI...");
+    const verifyResult = await sandbox.runCommand("claude-code", ["--version"]);
+    const claudeVersion = await verifyResult.stdout();
+    console.log(`Claude Code version: ${claudeVersion.trim()}`);
+
+    // Check which claude-code is being used
+    const whichResult = await sandbox.runCommand("which", ["claude-code"]);
+    const claudePath = await whichResult.stdout();
+    console.log(`Claude Code path: ${claudePath.trim()}`);
+
     // Build command arguments
     const args = [
       config.topic,
@@ -122,7 +133,16 @@ export default async function handler(
     const stderr = await generateResult.stderr();
 
     if (generateResult.exitCode !== 0) {
-      throw new Error(`Article generation failed: ${stderr}`);
+      // Return detailed error information
+      return res.status(500).json({
+        error: "Article generation failed",
+        details: {
+          exitCode: generateResult.exitCode,
+          stdout,
+          stderr,
+          command: `pnpm generate ${args.join(" ")}`,
+        },
+      });
     }
 
     // Find the generated file
