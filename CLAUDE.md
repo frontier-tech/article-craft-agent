@@ -11,19 +11,20 @@
 ## プロジェクト構成
 
 ```
-src/
-├── index.ts          # CLI エントリポイント
-├── pipeline.ts       # オーケストレーター
-├── types.ts          # 型定義 + Zod スキーマ
-├── agents/
-│   ├── index.ts      # re-export
-│   ├── researcher.ts # リサーチ担当 (WebSearch/WebFetch, sonnet)
-│   ├── outliner.ts   # 構成担当 (sonnet)
-│   ├── writer.ts     # 執筆担当 (opus)
-│   └── editor.ts     # 編集担当 (opus)
-└── output/
-    ├── index.ts      # ファイル保存
-    └── formatter.ts  # frontmatter 生成
+├── agents/               # エージェント定義 (SDK local plugin)
+│   ├── researcher.md     # リサーチ担当 (WebSearch/WebFetch, sonnet)
+│   ├── outliner.md       # 構成担当 (sonnet)
+│   ├── writer.md         # 執筆担当 (opus)
+│   └── editor.md         # 編集担当 (opus)
+├── src/
+│   ├── index.ts          # CLI エントリポイント
+│   ├── config.ts         # プラグイン設定
+│   ├── pipeline.ts       # オーケストレーター
+│   ├── types.ts          # 型定義 + Zod スキーマ
+│   └── output/
+│       ├── index.ts      # ファイル保存
+│       └── formatter.ts  # frontmatter 生成
+└── output/               # 生成記事 (gitignore)
 ```
 
 ## 使い方

@@ -1,20 +1,10 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
-import {
-  createResearcherAgent,
-  createOutlinerAgent,
-  createWriterAgent,
-  createEditorAgent,
-} from "./agents/index.js";
+import { DEFAULT_OPTIONS } from "./config.js";
 import { saveArticle } from "./output/index.js";
 import type { ArticleConfig, ArticleResult, PipelineOptions } from "./types.js";
 
 export async function runPipeline(options: PipelineOptions): Promise<string> {
   const { config, verbose, maxBudgetUsd, outputDir } = options;
-
-  const researcher = createResearcherAgent(config);
-  const outliner = createOutlinerAgent(config);
-  const writer = createWriterAgent(config);
-  const editor = createEditorAgent(config);
 
   const orchestratorPrompt = buildOrchestratorPrompt(config);
 
@@ -31,16 +21,8 @@ export async function runPipeline(options: PipelineOptions): Promise<string> {
   for await (const message of query({
     prompt: orchestratorPrompt,
     options: {
-      model: "claude-sonnet-4-5-20250929",
-      allowedTools: ["Task", "WebSearch", "WebFetch"],
-      permissionMode: "bypassPermissions",
+      ...DEFAULT_OPTIONS,
       maxBudgetUsd,
-      agents: {
-        researcher,
-        outliner,
-        writer,
-        editor,
-      },
     },
   })) {
     if (message.type === "assistant") {
@@ -104,7 +86,7 @@ Execute these agents IN ORDER. Each agent builds on the previous agent's output.
 4. **editor** — Polish and finalize the article. Output must include a JSON metadata block.
 
 ## Instructions
-- Pass the output of each agent as context to the next.
+- Pass the output of each agent as context to the next, including the article requirements above.
 - Use the Task tool to delegate to each agent in sequence.
 - After the editor finishes, output the COMPLETE final article exactly as the editor produced it (including the JSON metadata block).
 - Do NOT modify the editor's output.`;
@@ -142,8 +124,7 @@ function parseEditorOutput(text: string, config: ArticleConfig): ArticleResult {
       .replace(/^-|-$/g, "");
 
   // Count words (handle both English and Japanese)
-  const wordCount =
-    metadata.wordCount || countWords(content);
+  const wordCount = metadata.wordCount || countWords(content);
 
   return {
     title,
