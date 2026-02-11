@@ -1,8 +1,8 @@
 {
   "functions": {
     "api/generate.ts": {
-      "maxDuration": 300,
-      "memory": 1024
+      "maxDuration": 900,
+      "memory": 3008
     }
   }
 }
