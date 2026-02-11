@@ -18,8 +18,15 @@ export async function runPipeline(options: PipelineOptions): Promise<string> {
   let finalText = "";
   let totalCost = 0;
 
+  // Get API key from environment
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY environment variable is not set");
+  }
+
   for await (const message of query({
     prompt: orchestratorPrompt,
+    apiKey,
     options: {
       ...DEFAULT_OPTIONS,
       maxBudgetUsd,

@@ -91,6 +91,14 @@ export default async function handler(
     const claudePath = await whichResult.stdout();
     console.log(`Claude Code path: ${claudePath.trim()}`);
 
+    // Configure Claude Code CLI with API key
+    console.log("Configuring Claude Code CLI...");
+    const apiKey = process.env.ANTHROPIC_API_KEY || "";
+
+    // Use environment variable to authenticate (Claude Code CLI reads ANTHROPIC_API_KEY)
+    // No explicit login needed - the SDK will use the env var
+    console.log("ANTHROPIC_API_KEY is set:", apiKey ? "Yes" : "No");
+
     // Build command arguments
     const args = [
       config.topic,
