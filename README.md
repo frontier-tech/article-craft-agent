@@ -84,7 +84,7 @@ In Vercel dashboard, add these environment variables:
 |----------|-------------|---------|
 | `ANTHROPIC_API_KEY` | Claude API key | `sk-ant-api03-xxxxx` |
 | `API_SECRET` | Secret key for API authentication | `your-random-secret-key` |
-| `GIT_REPO_URL` | GitHub repository URL | `https://github.com/username/article-craft-agent.git` |
+| `GIT_REPO_URL` | GitHub repository URL | `https://github.com/frontier-tech/article-craft-agent.git` |
 | `GIT_REPO_BRANCH` | Branch to use (optional) | `main` |
 
 To add environment variables:
