@@ -91,13 +91,23 @@ export default async function handler(
     const claudePath = await whichResult.stdout();
     console.log(`Claude Code path: ${claudePath.trim()}`);
 
-    // Configure Claude Code CLI with API key
-    console.log("Configuring Claude Code CLI...");
+    // Configure environment variables by creating .env file
+    console.log("Configuring environment variables...");
     const apiKey = process.env.ANTHROPIC_API_KEY || "";
 
-    // Use environment variable to authenticate (Claude Code CLI reads ANTHROPIC_API_KEY)
-    // No explicit login needed - the SDK will use the env var
-    console.log("ANTHROPIC_API_KEY is set:", apiKey ? "Yes" : "No");
+    if (!apiKey) {
+      throw new Error("ANTHROPIC_API_KEY is not set in Vercel environment variables");
+    }
+
+    // Create .env file in sandbox
+    await sandbox.writeFiles([
+      {
+        path: ".env",
+        content: Buffer.from(`ANTHROPIC_API_KEY=${apiKey}\n`),
+      },
+    ]);
+
+    console.log("ANTHROPIC_API_KEY configured in .env file");
 
     // Build command arguments
     const args = [
@@ -126,16 +136,9 @@ export default async function handler(
       args.push("--verbose");
     }
 
-    // Set environment variables (ANTHROPIC_API_KEY)
-    const env = {
-      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || "",
-    };
-
     // Run article generation
     console.log(`Generating article for: ${config.topic}`);
-    const generateResult = await sandbox.runCommand("pnpm", ["generate", ...args], {
-      env,
-    });
+    const generateResult = await sandbox.runCommand("pnpm", ["generate", ...args]);
 
     const stdout = await generateResult.stdout();
     const stderr = await generateResult.stderr();
