@@ -36,60 +36,20 @@ export default async function handler(
   let sandbox: Sandbox | null = null;
 
   try {
-    // Get repository URL from environment or request
-    const repoUrl = process.env.GIT_REPO_URL || req.body.repoUrl;
-    const repoBranch = process.env.GIT_REPO_BRANCH || req.body.repoBranch || "main";
+    // Create sandbox from pre-built snapshot (much faster!)
+    const snapshotId = process.env.VERCEL_SNAPSHOT_ID || "snap_p92BN77bjc6ukh0KIfJpt8CtPjig";
 
-    if (!repoUrl) {
-      throw new Error("GIT_REPO_URL is required");
-    }
-
-    // Create sandbox with Git repository source
-    console.log(`Creating sandbox from repo: ${repoUrl}`);
+    console.log(`Creating sandbox from snapshot: ${snapshotId}`);
     sandbox = await Sandbox.create({
       runtime: "node24",
-      timeout: 300000, // 5 minutes
+      timeout: 900000, // 15 minutes
       source: {
-        type: "git",
-        url: repoUrl,
-        revision: repoBranch,
+        type: "snapshot",
+        snapshotId,
       },
     });
 
-    console.log(`Sandbox created: ${sandbox.sandboxId}`);
-
-    // Install dependencies
-    console.log("Installing dependencies...");
-    const installResult = await sandbox.runCommand("pnpm", ["install"]);
-
-    if (installResult.exitCode !== 0) {
-      const stderr = await installResult.stderr();
-      throw new Error(`Failed to install dependencies: ${stderr}`);
-    }
-
-    // Install Claude Code CLI globally
-    console.log("Installing Claude Code CLI...");
-    const claudeInstallResult = await sandbox.runCommand("npm", [
-      "install",
-      "-g",
-      "@anthropic-ai/claude-code"
-    ]);
-
-    if (claudeInstallResult.exitCode !== 0) {
-      const stderr = await claudeInstallResult.stderr();
-      throw new Error(`Failed to install Claude Code CLI: ${stderr}`);
-    }
-
-    // Verify Claude Code CLI installation
-    console.log("Verifying Claude Code CLI...");
-    const verifyResult = await sandbox.runCommand("claude-code", ["--version"]);
-    const claudeVersion = await verifyResult.stdout();
-    console.log(`Claude Code version: ${claudeVersion.trim()}`);
-
-    // Check which claude-code is being used
-    const whichResult = await sandbox.runCommand("which", ["claude-code"]);
-    const claudePath = await whichResult.stdout();
-    console.log(`Claude Code path: ${claudePath.trim()}`);
+    console.log(`✅ Sandbox created from snapshot: ${sandbox.sandboxId}`);
 
     // Configure environment variables by creating .env file
     console.log("Configuring environment variables...");
