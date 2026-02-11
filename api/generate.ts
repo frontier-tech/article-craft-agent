@@ -67,6 +67,19 @@ export default async function handler(
       throw new Error(`Failed to install dependencies: ${stderr}`);
     }
 
+    // Install Claude Code CLI globally
+    console.log("Installing Claude Code CLI...");
+    const claudeInstallResult = await sandbox.runCommand("npm", [
+      "install",
+      "-g",
+      "@anthropic-ai/claude-code"
+    ]);
+
+    if (claudeInstallResult.exitCode !== 0) {
+      const stderr = await claudeInstallResult.stderr();
+      throw new Error(`Failed to install Claude Code CLI: ${stderr}`);
+    }
+
     // Build command arguments
     const args = [
       config.topic,
