@@ -136,9 +136,17 @@ export default async function handler(
       args.push("--verbose");
     }
 
-    // Run article generation
+    // Run article generation with ANTHROPIC_API_KEY env var
     console.log(`Generating article for: ${config.topic}`);
-    const generateResult = await sandbox.runCommand("pnpm", ["generate", ...args]);
+
+    // Build command with env var prefix
+    const cmdWithEnv = `ANTHROPIC_API_KEY="${apiKey}" pnpm generate ${args.map(arg =>
+      arg.includes(" ") ? `"${arg}"` : arg
+    ).join(" ")}`;
+
+    console.log(`Running command: ${cmdWithEnv.substring(0, 100)}...`);
+
+    const generateResult = await sandbox.runCommand("sh", ["-c", cmdWithEnv]);
 
     const stdout = await generateResult.stdout();
     const stderr = await generateResult.stderr();
